@@ -39,6 +39,12 @@ def insert_into_institution(data):
     cursor.executemany(query,processed_data)
     conn.commit()
 
+def insert_into_contact(data):
+    processed_data = [ (
+    query = """INSERT INTO contact (contact_name,contact_email_address, contact_notes, institution_uuid)
+                VALUES (%s , %s , %s );"""
+    cursor.executemany(query,processed_data)
+    conn.commit()
 
 conn = psycopg2.connect(database='obp_institutions',
                         user = 'obp',
@@ -52,6 +58,7 @@ with open("data.json") as f:
     data = json.load(f)
     data = append_uuid(data)
     #insert_into_institution(data)
+    insert_into_contact(data)
     cursor.close()
     conn.close()
     
