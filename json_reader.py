@@ -33,16 +33,16 @@ def get_inst_country_code(country):
         return "00" # will return Key(institution_country_code) = (00) is not present in table "country".
 
 def insert_into_institution(data):
-    processed_data = [ ( str(data[x]["Institution-uuid"]) , str(data[x]["Institution"].encode('utf-8')) , get_inst_country_code(data[x]["Country"]) ) for x in range(len(data)) ]
+    processed_data = [ ( data[x]["Institution-uuid"] , data[x]["Institution"] , get_inst_country_code(data[x]["Country"]) ) for x in range(len(data)) ]
     query = """INSERT INTO institution (institution_uuid,institution_name, institution_country_code)
                 VALUES ( %s , %s , %s ); """
     cursor.executemany(query,processed_data)
     conn.commit()
 
 def insert_into_contact(data):
-    processed_data = [ (
+    processed_data = [ ( "some guy", data[x]["Contact"] , "Hello world" , data[x]["Institution-uuid"] ) for x in range(len(data)) ]
     query = """INSERT INTO contact (contact_name,contact_email_address, contact_notes, institution_uuid)
-                VALUES (%s , %s , %s );"""
+                VALUES (%s , %s , %s , %s);"""
     cursor.executemany(query,processed_data)
     conn.commit()
 
@@ -57,7 +57,7 @@ with open("data.json") as f:
     print "Loading JSON file."
     data = json.load(f)
     data = append_uuid(data)
-    #insert_into_institution(data)
+    insert_into_institution(data)
     insert_into_contact(data)
     cursor.close()
     conn.close()
