@@ -34,7 +34,8 @@ with open("data.json") as f:
     print "Loading JSON file."
     data = json.load(f)
     data = append_uuid(data)
-
+    cursor.close()
+    conn.close()
     
 
 
