@@ -23,6 +23,23 @@ def append_uuid(data):
         
     return data
         
+def get_inst_country_code(country):
+    # Returns country code of country where institution is located. 
+    cursor.execute("SELECT country_code , country_name FROM country WHERE country_name = %s",[country])
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    else:
+        return "00" # will return Key(institution_country_code) = (00) is not present in table "country".
+
+def insert_into_institution(data):
+    processed_data = [ ( str(data[x]["Institution-uuid"]) , str(data[x]["Institution"].encode('utf-8')) , get_inst_country_code(data[x]["Country"]) ) for x in range(len(data)) ]
+    query = """INSERT INTO institution (institution_uuid,institution_name, institution_country_code)
+                VALUES ( %s , %s , %s ); """
+    cursor.executemany(query,processed_data)
+    conn.commit()
+
+
 conn = psycopg2.connect(database='obp_institutions',
                         user = 'obp',
                         password = 'some_secret_password',
@@ -34,6 +51,7 @@ with open("data.json") as f:
     print "Loading JSON file."
     data = json.load(f)
     data = append_uuid(data)
+    #insert_into_institution(data)
     cursor.close()
     conn.close()
     
