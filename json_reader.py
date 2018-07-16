@@ -46,6 +46,16 @@ def insert_into_contact(data):
     cursor.executemany(query,processed_data)
     conn.commit()
 
+def insert_into_ip_range(data):
+    processed_data = []
+    for i in range(len(data)):
+        for j in range(len(data[i]["IP-Range"])):
+            processed_data.append( ( data[i]["IP-Range"][j] , data[i]["Institution-uuid"] ) )
+    query = """INSERT INTO ip_range (ip_range_value , institution_uuid)
+                VALUES (%s , %s);"""
+    cursor.executemany(query,processed_data)
+    conn.commit()
+
 conn = psycopg2.connect(database='obp_institutions',
                         user = 'obp',
                         password = 'some_secret_password',
@@ -59,6 +69,7 @@ with open("data.json") as f:
     data = append_uuid(data)
     insert_into_institution(data)
     insert_into_contact(data)
+    insert_into_ip_range(data)
     cursor.close()
     conn.close()
     
