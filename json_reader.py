@@ -30,6 +30,7 @@ def get_inst_country_code(country):
     if result:
         return result[0]
     else:
+        # TODO: Case where there is missing country code
         return "00" # will return Key(institution_country_code) = (00) is not present in table "country".
 
 def insert_into_institution(data):
