@@ -23,6 +23,7 @@ import sys
 import json
 import logging
 from errors import *
+import uuid
 
 # Determine logging level
 debug = os.environ['API_DEBUG'] == 'True'
@@ -34,6 +35,9 @@ logger = logging.getLogger(__name__)
 # Define routes
 urls = (
     "/institutions(/?)", "instctrl.InstitutionController",
+    "/contacts(/?)", "contactctrl.ContactController",
+    "/countries(/?)", "countryctrl.CountryController",
+    "/ipranges(/?)", "iprangectrl.IPRangeController",
     "(.*)", "NotFound",
 )
 
@@ -77,9 +81,39 @@ def result_to_institution(r):
     inst.load_ip_ranges()
     return inst
 
+def results_to_contacts(results):
+    data = []
+    for e in results:
+        data.append(result_to_contact(e).__dict__)
+    return data
 
-import instctrl
-from models import Institution
+def result_to_contact(r):
+    return Contact(r["institution_uuid"], r["contact_name"],
+                r["contact_email_address"], r["contact_notes"])
+
+def results_to_countries(results):
+    data = []
+    for e in results:
+        data.append(result_to_country(e).__dict__)
+    return data
+
+def result_to_country(r):
+    return Country(r["country_code"])
+
+def results_to_ip_ranges(results):
+    data = []
+    for e in results:
+        data.append(result_to_ip_range(e).__dict__)
+    return data
+
+def result_to_ip_range(r):
+    return IPRange(r["institution_uuid"],r["ip_range_value"])
+
+def generate_uuid_from_name(name):
+    return str(uuid.uuid3(uuid.NAMESPACE_DNS,name.encode("utf-8")))
+    
+import instctrl, contactctrl, countryctrl, iprangectrl
+from models import Institution, Contact, Country, IPRange
 
 if __name__ == "__main__":
     logger.info("Starting API...")
