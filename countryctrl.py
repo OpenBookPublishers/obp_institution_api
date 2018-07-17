@@ -28,6 +28,7 @@ class CountryController(object):
     @json_response
     @api_response
     def POST(self, name):
+        """Inserts new country."""
         data = json.loads(web.data())
         country_code = data.get('country_code')
         try:

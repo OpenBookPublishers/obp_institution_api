@@ -82,7 +82,7 @@ class IPRange(object):
 
     def save(self):
         db.insert('ip_range',institution_uuid=self.institution_id,
-                ip_range_value=self.ip_range)
+                ip_range_value=self.ip_range) # TODO what if it's an array?
 
     @staticmethod
     def get_all():

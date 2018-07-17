@@ -29,6 +29,7 @@ class InstitutionController(object):
     @json_response
     @api_response
     def POST(self, name):
+        """Inserts new institution."""
         data = json.loads(web.data())
         institution_name = data.get('institution_name')
         country_code = data.get('country_code')

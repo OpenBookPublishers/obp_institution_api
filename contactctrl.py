@@ -26,6 +26,7 @@ class ContactController(object):
         return data
 
     def POST(self, name):
+        """Inserts new contact."""
         data = json.loads(web.data())
         uuid = data.get('institution_uuid')
         name = data.get('contact_name')
