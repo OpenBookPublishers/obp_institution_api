@@ -41,7 +41,7 @@ def insert_into_institution(data):
     conn.commit()
 
 def insert_into_contact(data):
-    processed_data = [ ( "some guy", data[x]["Contact"] , "Hello world" , data[x]["Institution-uuid"] ) for x in range(len(data)) ]
+    processed_data = [ ( "", data[x]["Contact"] , "" , data[x]["Institution-uuid"] ) for x in range(len(data)) ]
     query = """INSERT INTO contact (contact_name,contact_email_address, contact_notes, institution_uuid)
                 VALUES (%s , %s , %s , %s);"""
     cursor.executemany(query,processed_data)
