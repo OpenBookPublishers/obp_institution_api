@@ -31,7 +31,7 @@ def get_inst_country_code(country):
         return result[0]
     else:
         # TODO: Case where there is missing country code
-        return "00" # will return Key(institution_country_code) = (00) is not present in table "country".
+        print "Couldn't find " + country
 
 def insert_into_institution(data):
     processed_data = [ ( data[x]["Institution-uuid"] , data[x]["Institution"] , get_inst_country_code(data[x]["Country"]) ) for x in range(len(data)) ]
