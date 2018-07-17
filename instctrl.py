@@ -49,4 +49,14 @@ class InstitutionController(object):
     @json_response
     @api_response
     def DELETE(self, name):
-        raise Error(NOTALLOWED)
+        """Deletes institution using institution uuid."""
+        data = json.loads(web.data())
+        uuid = data.get('institution_uuid')
+        try:
+            assert uuid
+        except AssertionError as error:
+            logger.debug(error)
+            raise Error(BADPARAMS)
+        institution_to_be_deleted = Institution.get_institution(uuid)
+        
+        return institution_to_be_deleted
