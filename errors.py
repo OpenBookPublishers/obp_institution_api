@@ -75,11 +75,10 @@ class Error(web.HTTPError):
         }
 
 class NotFound(Error):
-    """Catch al class for all requests not in allowed routes"""
+    """Catch all class for all requests not in allowed routes"""
 
     def GET(self, name):
-        raise Error(NOTFOUND,
-                    msg="The only routes allowed are '/translate' and '/works'")
+        raise Error(NOTFOUND)
 
     def POST(self, name):
         raise Error(NOTALLOWED)
