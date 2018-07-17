@@ -1,0 +1,29 @@
+version: "3.5"
+
+services:
+  obp_institution_db:
+    image: openbookpublishers/obp_institution_db
+    container_name: "obp_institution_db"
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - db.env
+
+  obp_institution_api:
+    build: ./
+    container_name: "obp_institution_api"
+    restart: unless-stopped
+    ports:
+      - 8181:8080
+    environment:
+      - INSTITUTIONDB_HOST=obp_institution_db
+      - API_DEBUG=True
+    env_file:
+      - db.env
+    depends_on:
+      - obp_institution_db
+
+volumes:
+  db:
