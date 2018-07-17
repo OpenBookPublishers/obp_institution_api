@@ -38,7 +38,8 @@ class Institution(object):
                 institution_uuid=self.UUID, institution_country_code=self.country_code)
 
     def delete(self):
-        db.delete('institution', where='institution_uuid=self.UUID')
+        options = dict(uuid=self.UUID)
+        db.delete('institution',vars = options, where='institution_uuid=$uuid')
 
     @staticmethod
     def get_all():

@@ -57,6 +57,9 @@ class InstitutionController(object):
         except AssertionError as error:
             logger.debug(error)
             raise Error(BADPARAMS)
-        institution_to_be_deleted = Institution.get_institution(uuid)
-        
-        return institution_to_be_deleted
+        results = Institution.get_institution(uuid)
+        for result in results:
+            institution_to_be_deleted = Institution(result['institution_uuid'],
+                 result['institution_name'],result['institution_country_code'])
+            institution_to_be_deleted.delete()
+        return results_to_institutions(results) # TODO why doesn't it return institutions that are deleted?
