@@ -37,6 +37,10 @@ class Institution(object):
         db.insert('institution',institution_name=self.name,
                 institution_uuid=self.UUID, institution_country_code=self.country_code)
 
+    def delete(self):
+        options = dict(uuid=self.UUID)
+        db.delete('institution',vars = options, where='institution_uuid=$uuid')
+
     @staticmethod
     def get_all():
         try:

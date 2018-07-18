@@ -27,6 +27,7 @@ class IPRangeController(object):
 
 
     def POST(self, name):
+        """Inserts new iprange."""
         data = json.loads(web.data())
         uuid = data.get('institution_uuid')
         ip_range = data.get('ip_range')
