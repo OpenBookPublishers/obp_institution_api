@@ -25,7 +25,9 @@ _level_messages = {
     FATAL:        'Something terrible has happened.',
     UNAUTHORIZED: 'Authentication is needed.',
     FORBIDDEN:    'You do not have permissions to access this resource.',
-    BADAUTH:      'Wrong credentials provided.'
+    BADAUTH:      'Wrong credentials provided.',
+    NOTVALIDIP:   'Invalid IP range. Cannot be cidrized.'
+    IPEXISTS:     'IP already exists.'
 }
 
 _level_statuses = {
@@ -39,7 +41,10 @@ _level_statuses = {
     FATAL:        '500 Internal Server Error',
     UNAUTHORIZED: '401 Unauthorized',
     FORBIDDEN:    '403 Forbidden',
-    BADAUTH:      '401 Unauthorized'
+    BADAUTH:      '401 Unauthorized',
+    NOTVALIDIP:   '400 Bad Request',
+    IPEXISTS:     '403 Bad Request'
+
 }
 
 class Error(web.HTTPError):

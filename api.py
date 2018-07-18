@@ -24,6 +24,8 @@ import json
 import logging
 from errors import *
 import uuid
+from cidrize import cidrize,CidrizeError
+from netaddr import IPAddress,IPNetwork
 
 # Determine logging level
 debug = os.environ['API_DEBUG'] == 'True'
@@ -111,6 +113,24 @@ def result_to_ip_range(r):
 
 def generate_uuid():
     return str(uuid.uuid4())
+
+def isIPValid(ip_range_value):
+    try:
+        cidrize(ip_range_value)
+        return True
+    except CidrizedError as error:
+        logger.debug(error)
+        raise Error(NOTVALIDIP)
+        return False
+
+def doesIPExists(ip_range_value): # TODO Not exactly fond of this check.
+    ip_ranges = results_to_ip_ranges(IPRange.get_all())
+    for ip_range in ip_ranges:
+        for ip_address in IPNetwork(ip_range_value):
+            if IPAddress(ip_address) in IPNetwork(ip_range['ip_range_value']):
+                return True
+    raise Error(IPEXISTS)
+    return False
 
 import instctrl, contactctrl, countryctrl, iprangectrl
 from models import Institution, Contact, Country, IPRange
