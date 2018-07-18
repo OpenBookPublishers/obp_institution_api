@@ -88,7 +88,7 @@ def results_to_contacts(results):
     return data
 
 def result_to_contact(r):
-    return Contact(r["institution_uuid"], r["contact_name"],
+    return Contact(r["contact_uuid"], r["institution_uuid"], r["contact_name"],
                 r["contact_email_address"], r["contact_notes"])
 
 def results_to_countries(results):
@@ -109,9 +109,9 @@ def results_to_ip_ranges(results):
 def result_to_ip_range(r):
     return IPRange(r["institution_uuid"],r["ip_range_value"])
 
-def generate_uuid_from_name(name):
-    return str(uuid.uuid3(uuid.NAMESPACE_DNS,name.encode("utf-8")))
-    
+def generate_uuid():
+    return str(uuid.uuid4())
+
 import instctrl, contactctrl, countryctrl, iprangectrl
 from models import Institution, Contact, Country, IPRange
 
