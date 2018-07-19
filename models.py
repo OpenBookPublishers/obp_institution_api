@@ -141,12 +141,30 @@ class IPRange(object):
         self.ip_range_value = ip_range
 
     def save(self):
+        params = dict(ip_range=self.ip_range_value,institution_uuid=self.institution_uuid)
+        q = """INSERT INTO ip_range (ip_range_value, institution_uuid)
+        SELECT $ip_range,$institution_uuid
+        WHERE NOT
+        ( select inet $ip_range && any ( array(select ip_range_value from ip_range)::inet[] ) )
+         OR NOT EXISTS (SELECT ip_range_value FROM ip_range);"""
         try:
-            db.insert('ip_range',institution_uuid=self.institution_uuid,
-                ip_range_value=self.ip_range_value)
+            result = db.query(q,params)
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
+        if result == 0:
+            p = """SELECT * FROM(
+            SELECT ip_range_value, institution_name,
+            (select inet $ip_range && ip_range_value)
+            AS condition FROM ip_range
+            JOIN institution USING (institution_uuid)
+            ) table1
+            WHERE condition = true
+            """
+            temp = db.query(p,params)
+            result = temp[0]
+            raise Error(IPEXISTS,msg="The ip provided (%s) contains or is contained by %s from %s."
+            % (self.ip_range_value,result.ip_range_value,result.institution_name))
 
     def delete(self):
         try:
@@ -155,7 +173,7 @@ class IPRange(object):
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
-            
+
     @staticmethod
     def get_all():
         try:

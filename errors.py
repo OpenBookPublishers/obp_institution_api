@@ -6,12 +6,12 @@ NOTALLOWED   = 20
 BADPARAMS    = 30
 BADFILTERS   = 40
 NORESULT     = 50
-NONCANONICAL = 60
-AMBIGUOUS    = 70
 FATAL        = 80
 UNAUTHORIZED = 90
 FORBIDDEN    = 100
 BADAUTH      = 110
+NOTVALIDIP   = 120
+IPEXISTS     = 130
 DEFAULT      = NOTFOUND
 
 _level_messages = {
@@ -20,13 +20,11 @@ _level_messages = {
     BADPARAMS:    'Invalid parameters provided.',
     BADFILTERS:   'Invalid filters supplied.',
     NORESULT:     'No records have matched your search criteria.',
-    NONCANONICAL: 'There is no canonical URI for the fittest candidate.',
-    AMBIGUOUS:    'More than one work share the lowest search score.',
     FATAL:        'Something terrible has happened.',
     UNAUTHORIZED: 'Authentication is needed.',
     FORBIDDEN:    'You do not have permissions to access this resource.',
     BADAUTH:      'Wrong credentials provided.',
-    NOTVALIDIP:   'Invalid IP range. Cannot be cidrized.'
+    NOTVALIDIP:   'Invalid IP range. Cannot be cidrized.',
     IPEXISTS:     'IP already exists.'
 }
 
@@ -36,8 +34,6 @@ _level_statuses = {
     BADPARAMS:    '400 Bad Request',
     BADFILTERS:   '400 Bad Request',
     NORESULT:     '404 Not Found',
-    NONCANONICAL: '404 Not Found',
-    AMBIGUOUS:    '404 Not Found',
     FATAL:        '500 Internal Server Error',
     UNAUTHORIZED: '401 Unauthorized',
     FORBIDDEN:    '403 Forbidden',

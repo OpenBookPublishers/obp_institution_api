@@ -37,10 +37,10 @@ class IPRangeController(object):
         except AssertionError as error:
             logger.debug(error)
             raise Error(BADPARAMS)
-        if isIPValid(ip_range_value) and not doesIPExists(ip_range_value):
-            iprange = IPRange(institution_uuid,ip_range_value)
-            iprange.save()
-            return [iprange.__dict__]
+        #if isIPValid(ip_range_value) and not doesIPExists(ip_range_value):
+        iprange = IPRange(institution_uuid,ip_range_value)
+        iprange.save()
+        return [iprange.__dict__]
 
     def PUT(self, name):
         raise Error(NOTALLOWED,msg="Try deleting or inserting instead.")
