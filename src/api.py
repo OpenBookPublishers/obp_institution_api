@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Identifier Translator JSON API prototype. Simple web.py based API to a PostgreSQL database that runs on port 8080.
+Institutional IP ranges API. Simple web.py based API to a PostgreSQL database.
 
 usage: python api.py
 
-(c) Javier Arias, Open Book Publishers, March 2018
+(c) Tan Chuan, Open Book Publishers, March 2018
 Use of this software is governed by the terms of the MIT license
 
 Dependencies:
