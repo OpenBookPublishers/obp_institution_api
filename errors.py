@@ -39,7 +39,7 @@ _level_statuses = {
     FORBIDDEN:    '403 Forbidden',
     BADAUTH:      '401 Unauthorized',
     NOTVALIDIP:   '400 Bad Request',
-    IPEXISTS:     '403 Bad Request'
+    IPEXISTS:     '400 Bad Request'
 
 }
 
