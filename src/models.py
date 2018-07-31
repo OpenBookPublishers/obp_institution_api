@@ -3,6 +3,7 @@ from api import *
 from errors import *
 
 logger = logging.getLogger(__name__)
+dateformat = '%Y-%m-%dT%H:%M:%S%z'
 
 class Institution(object):
     def __init__(self, uuid, name, country_code):
@@ -29,6 +30,23 @@ class Institution(object):
             logger.debug(error)
             raise Error(FATAL)
 
+    def load_dates(self):
+        options = dict(uuid=self.institution_uuid)
+        try:
+            results = db.select('institution', options,
+                    where="institution_uuid=$uuid",
+                    what="institution_created_at,institution_updated_at").first()
+            self.set_attribute("institution_created_at",
+                                results['institution_created_at'].strftime(dateformat))
+            self.set_attribute("institution_updated_at",
+                                results['institution_updated_at'].strftime(dateformat))
+        except Exception as error:
+            logger.debug(error)
+            raise Error(FATAL)
+
+    def set_attribute(self,attribute,value):
+        self.__dict__.update({attribute:value})
+
     def load_contacts(self):
         data = []
         for e in self.get_contacts():
@@ -44,7 +62,10 @@ class Institution(object):
     def save(self):
         try:
             db.insert('institution',institution_name=self.institution_name,
-                    institution_uuid=self.institution_uuid, institution_country_code=self.country_code)
+                    institution_uuid=self.institution_uuid,
+                    institution_country_code=self.country_code,
+                    institution_created_at=web.SQLLiteral("NOW()"),
+                    institution_updated_at=web.SQLLiteral("NOW()"))
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
@@ -61,7 +82,9 @@ class Institution(object):
         options = dict(uuid=self.institution_uuid)
         try:
             db.update('institution',vars = options, where='institution_uuid=$uuid',
-                institution_name = self.institution_name,institution_country_code=self.country_code)
+                institution_name = self.institution_name,
+                institution_country_code=self.country_code,
+                institution_updated_at=web.SQLLiteral("NOW()"))
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
@@ -95,7 +118,9 @@ class Contact(object):
         try:
             db.insert('contact',contact_name=self.contact_name,
                     contact_email_address=self.email_address,contact_notes=self.notes,
-                    institution_uuid=self.institution_uuid, contact_uuid=self.contact_uuid)
+                    institution_uuid=self.institution_uuid, contact_uuid=self.contact_uuid,
+                    contact_created_at=web.SQLLiteral("NOW()"),
+                    contact_updated_at=web.SQLLiteral("NOW()"))
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
@@ -113,10 +138,28 @@ class Contact(object):
         try:
             db.update('contact',vars = options, where='contact_uuid=$uuid',
                 contact_name = self.contact_name,contact_email_address=self.email_address,
-                 contact_notes=self.notes,institution_uuid=self.institution_uuid,contact_uuid=self.contact_uuid)
+                 contact_notes=self.notes,institution_uuid=self.institution_uuid,
+                 contact_uuid=self.contact_uuid,contact_updated_at=web.SQLLiteral("NOW()"))
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
+
+    def load_dates(self):
+        options = dict(uuid=self.contact_uuid)
+        try:
+            results = db.select('contact', options,
+                    where="contact_uuid=$uuid",
+                    what="contact_created_at,contact_updated_at").first()
+            self.set_attribute("contact_created_at",
+                                results['contact_created_at'].strftime(dateformat))
+            self.set_attribute("contact_updated_at",
+                                results['contact_updated_at'].strftime(dateformat))
+        except Exception as error:
+            logger.debug(error)
+            raise Error(FATAL)
+
+    def set_attribute(self,attribute,value):
+        self.__dict__.update({attribute:value})
 
     @staticmethod
     def get_all():
@@ -141,9 +184,11 @@ class IPRange(object):
         self.ip_range_value = ip_range
 
     def save(self):
-        params = dict(ip_range=self.ip_range_value,institution_uuid=self.institution_uuid)
-        q = """INSERT INTO ip_range (ip_range_value, institution_uuid)
-        SELECT $ip_range,$institution_uuid
+        params = dict(ip_range=self.ip_range_value,
+                    institution_uuid=self.institution_uuid,
+                    ip_range_created_at=web.SQLLiteral("NOW()"))
+        q = """INSERT INTO ip_range (ip_range_value, ip_range_created_at, institution_uuid)
+        SELECT $ip_range,$ip_range_created_at,$institution_uuid
         WHERE NOT
         ( select inet $ip_range && any ( array(select ip_range_value from ip_range)::inet[] ) )
          OR NOT EXISTS (SELECT ip_range_value FROM ip_range);"""
@@ -173,6 +218,21 @@ class IPRange(object):
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
+
+    def load_dates(self):
+        options = dict(uuid=self.institution_uuid)
+        try:
+            results = db.select('ip_range', options,
+                    where="institution_uuid=$uuid",
+                    what="ip_range_created_at").first()
+            self.set_attribute("ip_range_created_at",
+                                results['ip_range_created_at'].strftime(dateformat))
+        except Exception as error:
+            logger.debug(error)
+            raise Error(FATAL)
+
+    def set_attribute(self,attribute,value):
+        self.__dict__.update({attribute:value})
 
     @staticmethod
     def get_all():

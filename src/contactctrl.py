@@ -32,7 +32,7 @@ class ContactController(object):
         data = json.loads(web.data())
         institution_uuid = data.get('institution_uuid')
         name = data.get('contact_name')
-        email_address = data.get('email_address')
+        email_address = data.get('contact_email_address')
         notes = data.get('contact_notes')
         try:
             assert institution_uuid and name
