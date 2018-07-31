@@ -4,7 +4,7 @@
 
 GET `/institutions` Get all institutions
 
-GET `/institutions?uuid=$uuid` Get single institution
+GET `/institutions?institution_uuid=$uuid` Get single institution
 
 POST `/institutions` institution\_name, country\_code
 
