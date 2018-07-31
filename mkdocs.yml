@@ -1,0 +1,10 @@
+site_name: obp_institution_api
+site_description: Institution API based on web.py.
+repo_url: https://github.com/OpenBookPublishers/obp_institution_api
+nav:
+    - Home: index.md
+    - User Guide:
+        - API Requests: /requests.md
+
+plugins:
+- search
