@@ -38,7 +38,6 @@ urls = (
     "/contacts(/?)", "contactctrl.ContactController",
     "/countries(/?)", "countryctrl.CountryController",
     "/ipranges(/?)", "iprangectrl.IPRangeController",
-    "(.*)", "NotFound",
 )
 
 try:
@@ -119,4 +118,6 @@ if __name__ == "__main__":
     logger.info("Starting API...")
     app = web.application(urls, globals())
     web.config.debug = debug
+    app.internalerror = internal_error
+    app.notfound = not_found
     app.run()

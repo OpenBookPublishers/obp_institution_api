@@ -15,9 +15,9 @@ class InstitutionController(object):
         """ Get institutions."""
         logger.debug("Query: %s" % (web.input()))
 
-        uuid   = web.input().get('uuid') or web.input().get('UUID')
+        institution_uuid   = web.input().get('institution_uuid')
         if uuid:
-            results = Institution.get_institution(uuid)
+            results = Institution.get_institution(institution_uuid)
         else:
             results = Institution.get_all()
 
@@ -38,8 +38,8 @@ class InstitutionController(object):
         except AssertionError as error:
             logger.debug(error)
             raise Error(BADPARAMS)
-        uuid = generate_uuid()
-        institution = Institution(uuid,institution_name,country_code)
+        institution_uuid = generate_uuid()
+        institution = Institution(institution_uuid,institution_name,country_code)
         institution.save()
         return [institution.__dict__]
 
@@ -48,11 +48,11 @@ class InstitutionController(object):
     def PUT(self, name):
         """Checks if entry exists using uuid, then modifies it."""
         data = json.loads(web.data())
-        uuid = data.get('institution_uuid')
+        institution_uuid = data.get('institution_uuid')
         name = data.get('institution_name')
         country_code = data.get('country_code')
         try:
-            assert uuid and name and country_code
+            assert institution_uuid and name and country_code
         except AssertionError as error:
             logger.debug(error)
             raise Error(BADPARAMS)
@@ -60,7 +60,7 @@ class InstitutionController(object):
             assert Institution.get_institution(uuid)[0]
         except:
             raise Error(NOTFOUND,msg="The institution provided does not exist.")
-        institution = Institution(uuid,name,country_code)
+        institution = Institution(institution_uuid,name,country_code)
         institution.update()
         return [institution.__dict__]
 
@@ -68,14 +68,14 @@ class InstitutionController(object):
     @api_response
     def DELETE(self, name):
         """Deletes institution using institution uuid."""
-        uuid = web.input().get('institution_uuid')
+        institution_uuid = web.input().get('institution_uuid')
         try:
-            assert uuid
+            assert institution_uuid
         except AssertionError as error:
             logger.debug(error)
             raise Error(BADPARAMS)
         try:
-            result = Institution.get_institution(uuid)[0]
+            result = Institution.get_institution(institution_uuid)[0]
         except:
             raise Error(NOTFOUND,msg="The institution provided does not exist.")
         institution = Institution(result['institution_uuid'],

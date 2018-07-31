@@ -75,17 +75,8 @@ class Error(web.HTTPError):
             'data': data
         }
 
-class NotFound(Error):
-    """Catch all class for all requests not in allowed routes"""
+def not_found():
+    raise Error(NOTFOUND)
 
-    def GET(self, name):
-        raise Error(NOTFOUND)
-
-    def POST(self, name):
-        raise Error(NOTALLOWED)
-
-    def PUT(self, name):
-        raise Error(NOTALLOWED)
-
-    def DELETE(self, name):
-        raise Error(NOTALLOWED)
+def internal_error():
+    raise Error(FATAL)
