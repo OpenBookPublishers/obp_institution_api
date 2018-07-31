@@ -16,7 +16,7 @@ class InstitutionController(object):
         logger.debug("Query: %s" % (web.input()))
 
         institution_uuid   = web.input().get('institution_uuid')
-        if uuid:
+        if institution_uuid:
             results = Institution.get_institution(institution_uuid)
         else:
             results = Institution.get_all()

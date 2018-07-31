@@ -24,6 +24,7 @@ import json
 import logging
 from errors import *
 import uuid
+import re
 
 # Determine logging level
 debug = os.environ['API_DEBUG'] == 'True'
@@ -110,6 +111,9 @@ def result_to_ip_range(r):
 
 def generate_uuid():
     return str(uuid.uuid4())
+
+def valid_email_address(email_address):
+    return not re.match(r"[^@]+@[^@]+\.[^@]+",email_address)
 
 import instctrl, contactctrl, countryctrl, iprangectrl
 from models import Institution, Contact, Country, IPRange
