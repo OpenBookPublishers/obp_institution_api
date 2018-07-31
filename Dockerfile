@@ -1,7 +1,6 @@
 FROM python:2
 
-RUN apt-get update && apt-get upgrade -y && \
-    pip install --upgrade pip
+RUN pip install --upgrade pip
 
 WORKDIR /usr/src/app
 
