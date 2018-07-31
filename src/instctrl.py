@@ -57,7 +57,7 @@ class InstitutionController(object):
             logger.debug(error)
             raise Error(BADPARAMS)
         try:
-            assert Institution.get_institution(uuid)[0]
+            assert Institution.get_institution(institution_uuid)[0]
         except:
             raise Error(NOTFOUND,msg="The institution provided does not exist.")
         institution = Institution(institution_uuid,name,country_code)

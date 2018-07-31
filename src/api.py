@@ -79,6 +79,7 @@ def result_to_institution(r):
     inst = Institution(r["institution_uuid"], r["institution_name"], r["institution_country_code"])
     inst.load_contacts()
     inst.load_ip_ranges()
+    inst.load_dates()
     return inst
 
 def results_to_contacts(results):
@@ -88,8 +89,10 @@ def results_to_contacts(results):
     return data
 
 def result_to_contact(r):
-    return Contact(r["contact_uuid"], r["institution_uuid"], r["contact_name"],
+    contact = Contact(r["contact_uuid"], r["institution_uuid"], r["contact_name"],
                 r["contact_email_address"], r["contact_notes"])
+    contact.load_dates()
+    return contact
 
 def results_to_countries(results):
     data = []
@@ -107,7 +110,9 @@ def results_to_ip_ranges(results):
     return data
 
 def result_to_ip_range(r):
-    return IPRange(r["institution_uuid"],r["ip_range_value"])
+    ipr = IPRange(r["institution_uuid"],r["ip_range_value"])
+    ipr.load_dates()
+    return ipr
 
 def generate_uuid():
     return str(uuid.uuid4())

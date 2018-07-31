@@ -32,7 +32,7 @@ class ContactController(object):
         data = json.loads(web.data())
         institution_uuid = data.get('institution_uuid')
         name = data.get('contact_name')
-        email_address = data.get('email_address')
+        email_address = data.get('contact_email_address')
         notes = data.get('contact_notes')
         try:
             assert institution_uuid and name
@@ -43,11 +43,6 @@ class ContactController(object):
             assert Institution.get_institution(institution_uuid)[0]
         except:
             raise Error(NOTFOUND,msg="The institution provided does not exist.")
-        if email_address:
-            try:
-                assert valid_email_address(email_address)
-            except:
-                raise Error(BADPARAMS,msg="Email address is not valid.")
         contact_uuid = generate_uuid()
         contact = Contact(contact_uuid,institution_uuid,name,email_address,notes)
         contact.save()
@@ -72,11 +67,6 @@ class ContactController(object):
             assert Contact.get_from_uuid(contact_uuid)[0]
         except:
             raise Error(NOTFOUND,msg="The contact uuid provided does not exist.")
-        if email_address:
-            try:
-                assert valid_email_address(email_address)
-            except:
-                raise Error(BADPARAMS,msg="Email address is not valid.")  
         contact = Contact(contact_uuid,institution_uuid,name,email_address,notes)
         contact.update()
         return [contact.__dict__]
