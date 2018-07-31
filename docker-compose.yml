@@ -9,7 +9,7 @@ services:
       - db:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     env_file:
-      - db.env
+      - ./config/db.env
 
   obp_institution_api:
     build: ./
@@ -21,7 +21,7 @@ services:
       - INSTITUTIONDB_HOST=obp_institution_db
       - API_DEBUG=True
     env_file:
-      - db.env
+      - ./config/db.env
     depends_on:
       - obp_institution_db
 
