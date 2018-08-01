@@ -12,6 +12,7 @@ FORBIDDEN    = 100
 BADAUTH      = 110
 NOTVALIDIP   = 120
 IPEXISTS     = 130
+SAMEINST     = 140
 DEFAULT      = NOTFOUND
 
 _level_messages = {
@@ -25,7 +26,8 @@ _level_messages = {
     FORBIDDEN:    'You do not have permissions to access this resource.',
     BADAUTH:      'Wrong credentials provided.',
     NOTVALIDIP:   'Invalid IP range. Cannot be cidrized.',
-    IPEXISTS:     'IP already exists.'
+    IPEXISTS:     'IP already exists.',
+    SAMEINST:     'The two uuids provided are the same.'
 }
 
 _level_statuses = {
@@ -39,7 +41,8 @@ _level_statuses = {
     FORBIDDEN:    '403 Forbidden',
     BADAUTH:      '401 Unauthorized',
     NOTVALIDIP:   '400 Bad Request',
-    IPEXISTS:     '400 Bad Request'
+    IPEXISTS:     '400 Bad Request',
+    SAMEINST:     '400 Bad Request'
 
 }
 

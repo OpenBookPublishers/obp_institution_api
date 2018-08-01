@@ -39,6 +39,7 @@ urls = (
     "/contacts(/?)", "contactctrl.ContactController",
     "/countries(/?)", "countryctrl.CountryController",
     "/ipranges(/?)", "iprangectrl.IPRangeController",
+    "/instrelations(/?)","instrelctrl.InstRelationsController",
 )
 
 try:
@@ -80,6 +81,7 @@ def result_to_institution(r):
     inst.load_contacts()
     inst.load_ip_ranges()
     inst.load_dates()
+    inst.load_relations()
     return inst
 
 def results_to_contacts(results):
@@ -114,11 +116,21 @@ def result_to_ip_range(r):
     ipr.load_dates()
     return ipr
 
+def results_to_relations(results):
+    data = []
+    for e in results:
+        data.append(result_to_relation(e).__dict__)
+    return data
+
+def result_to_relation(r):
+    rel = InstRelation(r["ir_parent_id"],r["ir_child_id"])
+    return rel
+
 def generate_uuid():
     return str(uuid.uuid4())
 
-import instctrl, contactctrl, countryctrl, iprangectrl
-from models import Institution, Contact, Country, IPRange
+import instctrl, contactctrl, countryctrl, iprangectrl,instrelctrl
+from models import Institution, Contact, Country, IPRange, InstRelation
 
 if __name__ == "__main__":
     logger.info("Starting API...")

@@ -30,6 +30,21 @@ class Institution(object):
             logger.debug(error)
             raise Error(FATAL)
 
+    def load_relations(self):
+        try:
+            q = '''SELECT * FROM institution_relation WHERE
+                                                ir_parent_id = $uuid OR
+                                                ir_child_id = $uuid'''
+            params = dict(uuid=self.institution_uuid)
+            results = db.query(q,params)
+            data = []
+            for e in results:
+                data.append(e)
+            self.set_attribute("relations",data)
+        except Exception as error:
+            logger.debug(error)
+            raise Error(FATAL)
+
     def load_dates(self):
         options = dict(uuid=self.institution_uuid)
         try:
@@ -308,6 +323,59 @@ class Country(object):
         q = """SELECT country_code FROM country_name WHERE country_name = $name"""
         try:
             return db.query(q,options)
+        except Exception as error:
+            logger.debug(error)
+            raise Error(FATAL)
+
+class InstRelation(object):
+    def __init__(self, parent_uuid, child_uuid):
+        self.parent_inst_uuid = parent_uuid
+        self.child_inst_uuid = child_uuid
+
+    def save(self):
+        try:
+            q = '''INSERT INTO institution_relation (ir_parent_id, ir_child_id) VALUES ($parent_inst_uuid,$child_inst_uuid)'''
+            params = dict(parent_inst_uuid=self.parent_inst_uuid,child_inst_uuid=self.child_inst_uuid)
+            with db.transaction():
+                db.query(q,params)
+        except Exception as error:
+            logger.debug(error)
+            raise Error(FATAL)
+
+    def delete(self):
+        try:
+            q = '''DELETE FROM institution_relation WHERE
+                    ir_parent_id = $parent_inst_uuid
+                    AND ir_child_id = $child_inst_uuid'''
+            params = dict(parent_inst_uuid=self.parent_inst_uuid,child_inst_uuid=self.child_inst_uuid)
+            db.query(q,params)
+        except Exception as error:
+            logger.debug(error)
+            raise Error(FATAL)
+
+    @staticmethod
+    def get_all():
+        try:
+            q = """SELECT * FROM institution_relation"""
+            return db.query(q)
+        except (Exception, psycopg2.DatabaseError) as error:
+            logger.error(error)
+            raise Error(FATAL)
+
+    @staticmethod
+    def get_from_uuids(institution_uuid_a, institution_uuid_b):
+        options = dict(institution_uuid_a=institution_uuid_a ,
+                        institution_uuid_b=institution_uuid_b)
+        q1 = """SELECT * FROM institution_relation WHERE
+                ir_parent_id = $institution_uuid_a AND
+                ir_child_id = $institution_uuid_b"""
+        q2 = """SELECT * FROM institution_relation WHERE
+                ir_parent_id = $institution_uuid_b AND
+                ir_child_id = $institution_uuid_a"""
+        try:
+            results = db.query(q1,options)
+            if not results:
+                results = db.query(q2,options)
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
