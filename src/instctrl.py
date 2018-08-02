@@ -33,13 +33,32 @@ class InstitutionController(object):
         data = json.loads(web.data())
         institution_name = data.get('institution_name')
         country_code = data.get('country_code')
+        country_name = data.get('country_name')
+        institution_notes = data.get('institution_notes')
+        contacts = data.get('contacts')
+        ip_ranges = data.get('ip_ranges')
+        parent_of = data.get('parent_of')
+        child_of = data.get('child_of')
         try:
-            assert institution_name and country_code
+            assert institution_name
         except AssertionError as error:
             logger.debug(error)
             raise Error(BADPARAMS)
+        if country_name and not country_code:
+            try:
+                country_code = Country.get_from_name(country_name).first()['country_code']
+            except:
+                raise Error(BADPARAMS,msg="Country '%s' does not exist." %(country_name))
+        elif not country_name and not country_code:
+            raise Error(BADPARAMS,msg="No country provided.")
         institution_uuid = generate_uuid()
-        institution = Institution(institution_uuid,institution_name,country_code)
+        institution = Institution(institution_uuid,institution_name,
+                                                    country_code,
+                                                    institution_notes,
+                                                    contacts,
+                                                    ip_ranges,
+                                                    parent_of,
+                                                    child_of)
         institution.save()
         return [institution.__dict__]
 
