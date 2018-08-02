@@ -53,8 +53,9 @@ class Error(web.HTTPError):
         httpstatus = self.get_status(level)
         headers    = {'Content-Type': 'application/json'}
         message    = self.make_message(level, msg)
+        params     = web.input() if web.input() else web.data()
         output     = json.dumps(
-                        self.make_output(message, web.input(), data))
+                        self.make_output(message, params, data))
 
         web.HTTPError.__init__(self, httpstatus, headers, output)
 

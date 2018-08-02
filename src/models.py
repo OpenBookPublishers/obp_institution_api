@@ -109,10 +109,25 @@ class Institution(object):
                     ipr.save()
             if self.contacts:
                 for contact in self.contacts:
+                    try:
+                        assert contact['contact_name']
+                    except:
+                        raise Error(BADPARAMS, msg="Empty contact provided for %s" % (self.institution_name))
+                    try:
+                        assert contact['contact_notes']
+                    except:
+                        contact['contact_notes'] = None
+                        pass
+                    try:
+                        assert contact['contact_email_address']
+                    except:
+                        contact['contact_email_address'] = None
+                        pass
+
                     c = Contact(generate_uuid(),self.institution_uuid,
                                                 contact['contact_name'],
-                                                contact['contact_email_address'] if contact['contact_email_address'] else None,
-                                                contact['contact_notes'] if contact['contact_notes'] else None)
+                                                contact['contact_email_address'],
+                                                contact['contact_notes'])
                     c.save()
             if self.parent_of:
                 for child in self.parent_of:
