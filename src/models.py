@@ -6,10 +6,19 @@ logger = logging.getLogger(__name__)
 dateformat = '%Y-%m-%dT%H:%M:%S%z'
 
 class Institution(object):
-    def __init__(self, uuid, name, country_code):
+    def __init__(self, uuid, name, country_code, institution_notes="",
+                                                    contacts = [],
+                                                    ip_ranges = [],
+                                                    parent_of = [],
+                                                    child_of = []):
         self.institution_uuid  = uuid
         self.institution_name  = name
         self.country_code = country_code
+        self.institution_notes = institution_notes
+        self.contacts = contacts
+        self.ip_ranges = ip_ranges
+        self.parent_of = parent_of
+        self.child_of = child_of
 
     def get_contacts(self):
         options = dict(uuid=self.institution_uuid)
@@ -30,20 +39,33 @@ class Institution(object):
             logger.debug(error)
             raise Error(FATAL)
 
-    def load_relations(self):
+    def get_parents(self):
+        params = dict(uuid=self.institution_uuid)
         try:
-            q = '''SELECT * FROM institution_relation WHERE
-                                                ir_parent_id = $uuid OR
-                                                ir_child_id = $uuid'''
-            params = dict(uuid=self.institution_uuid)
-            results = db.query(q,params)
-            data = []
-            for e in results:
-                data.append(e)
-            self.set_attribute("relations",data)
+            return db.query('''SELECT ir_parent_id FROM institution_relation WHERE
+                                            ir_child_id = $uuid''',params)
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
+
+    def get_children(self):
+        params = dict(uuid=self.institution_uuid)
+        try:
+            return db.query('''SELECT ir_child_id FROM institution_relation WHERE
+                                            ir_parent_id = $uuid''',params)
+        except Exception as error:
+            logger.debug(error)
+            raise Error(FATAL)
+
+    def load_relations(self):
+        data = []
+        for e in self.get_children():
+            data.append(e['ir_child_id'])
+        self.set_attribute("parent_of",data)
+        data = []
+        for e in self.get_parents():
+            data.append(e['ir_parent_id'])
+        self.set_attribute("child_of",data)
 
     def load_dates(self):
         options = dict(uuid=self.institution_uuid)
@@ -65,25 +87,41 @@ class Institution(object):
     def load_contacts(self):
         data = []
         for e in self.get_contacts():
-            data.append(e)
+            data.append(e['contact_uuid'])
         self.contacts = data
 
     def load_ip_ranges(self):
         data = []
         for e in self.get_ip_ranges():
-            data.append(e)
+            data.append(e['ip_range_value'])
         self.ip_ranges = data
 
     def save(self):
-        try:
+        with db.transaction():
             db.insert('institution',institution_name=self.institution_name,
-                    institution_uuid=self.institution_uuid,
-                    institution_country_code=self.country_code,
-                    institution_created_at=web.SQLLiteral("NOW()"),
-                    institution_updated_at=web.SQLLiteral("NOW()"))
-        except Exception as error:
-            logger.debug(error)
-            raise Error(FATAL)
+                             institution_uuid=self.institution_uuid,
+                             institution_country_code=self.country_code,
+                             institution_created_at=web.SQLLiteral("NOW()"),
+                             institution_updated_at=web.SQLLiteral("NOW()"))
+            if self.ip_ranges:
+                for ip_range in self.ip_ranges:
+                    ipr = IPRange(self.institution_uuid,ip_range)
+                    ipr.save()
+            if self.contacts:
+                for contact in self.contacts:
+                    c = Contact(generate_uuid(),self.institution_uuid,
+                                                contact['contact_name'],
+                                                contact['contact_email_address'] if contact['contact_email_address'] else None,
+                                                contact['contact_notes'] if contact['contact_notes'] else None)
+                    c.save()
+            if self.parent_of:
+                for child in self.parent_of:
+                    relation = InstRelation(self.institution_uuid,child)
+                    relation.save()
+            if self.child_of:
+                for parent in self.child_of:
+                    relation = InstRelation(parent,self.institution_uuid)
+                    relation.save()
 
     def delete(self):
         options = dict(uuid=self.institution_uuid)
@@ -99,7 +137,8 @@ class Institution(object):
             db.update('institution',vars = options, where='institution_uuid=$uuid',
                 institution_name = self.institution_name,
                 institution_country_code=self.country_code,
-                institution_updated_at=web.SQLLiteral("NOW()"))
+                institution_updated_at=web.SQLLiteral("NOW()"),
+                institution_notes=self.institution_notes)
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
