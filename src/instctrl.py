@@ -44,13 +44,18 @@ class InstitutionController(object):
         except AssertionError as error:
             logger.debug(error)
             raise Error(BADPARAMS)
-        if country_name and not country_code:
-            try:
+        try:
+            country = ""
+            if country_name and not country_code:
+                country = country_name
                 country_code = Country.get_from_name(country_name).first()['country_code']
-            except:
-                raise Error(BADPARAMS,msg="Country '%s' does not exist." %(country_name))
-        elif not country_name and not country_code:
-            raise Error(BADPARAMS,msg="No country provided.")
+            elif country_code and not country_name:
+                country = country_code
+                country_name = Country(country_code).get_names().first()['country_name']
+            else:
+                raise Error(BADPARAMS,msg="No country provided.")
+        except:
+            raise Error(BADPARAMS,msg="Country '%s' does not exist." %(country))
         institution_uuid = generate_uuid()
         institution = Institution(institution_uuid,institution_name,
                                                     country_code,
