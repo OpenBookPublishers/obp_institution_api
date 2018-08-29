@@ -9,6 +9,10 @@ class InstRelationsController(object):
     """Handles Institution Relation queries"""
 
     @json_response
+    def OPTIONS(self,name):
+        return
+        
+    @json_response
     @api_response
     def GET(self, name):
         """ Gets relationship between two uuids."""

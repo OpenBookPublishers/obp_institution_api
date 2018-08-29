@@ -8,6 +8,10 @@ logger = logging.getLogger(__name__)
 
 class InstitutionController(object):
     """Handles institution queries"""
+    
+    @json_response
+    def OPTIONS(self,name):
+        return
 
     @json_response
     @api_response
