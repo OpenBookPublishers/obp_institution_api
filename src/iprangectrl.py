@@ -9,6 +9,10 @@ class IPRangeController(object):
     """Handles IPRange queries"""
 
     @json_response
+    def OPTIONS(self,name):
+        return
+        
+    @json_response
     @api_response
     def GET(self, name):
         """ Get IP Range."""

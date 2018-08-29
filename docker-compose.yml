@@ -20,10 +20,11 @@ services:
     environment:
       - INSTITUTIONDB_HOST=obp_institution_db
       - API_DEBUG=True
+      - ALLOW_ORIGIN=http://172.21.0.5
     env_file:
       - ./config/db.env
     depends_on:
       - obp_institution_db
 
-volumes:
+-volumes:
   db:
