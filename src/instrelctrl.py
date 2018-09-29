@@ -11,9 +11,10 @@ class InstRelationsController(object):
     @json_response
     def OPTIONS(self,name):
         return
-        
+
     @json_response
     @api_response
+    @check_token
     def GET(self, name):
         """ Gets relationship between two uuids."""
         logger.debug("Query: %s" % (web.input()))
@@ -34,6 +35,7 @@ class InstRelationsController(object):
 
     @json_response
     @api_response
+    @check_token
     def POST(self, name):
         """Inserts new relation."""
         data = json.loads(web.data())
@@ -50,11 +52,13 @@ class InstRelationsController(object):
 
     @json_response
     @api_response
+    @check_token
     def PUT(self, name):
         raise Error(NOTALLOWED,msg="Try deleting or inserting instead.")
 
     @json_response
     @api_response
+    @check_token
     def DELETE(self, name):
         """Deletes relation using both uuids."""
         parent_inst_uuid = web.input().get('parent_inst_uuid')

@@ -4,3 +4,6 @@ psycopg2==2.6.1
 uri==2.0.0
 urllib3==1.20
 web.py==0.39
+cidrize
+openpyxl
+

@@ -1,6 +1,19 @@
 version: "3.5"
 
 services:
+  obp_institution_authdb:
+    image: openbookpublishers/tokens_db
+    container_name: "obp_institution_authdb"
+    restart: unless-stopped
+    volumes:
+      - authdb:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - ./config/authdb.env
+    networks:
+      institutions:
+        ipv4_address: 172.21.0.2
+
   obp_institution_db:
     image: openbookpublishers/obp_institution_db
     container_name: "obp_institution_db"
@@ -10,6 +23,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
     env_file:
       - ./config/db.env
+    networks:
+      institutions:
+        ipv4_address: 172.21.0.3
 
   obp_institution_api:
     build: ./
@@ -19,12 +35,26 @@ services:
       - 8181:8080
     environment:
       - INSTITUTIONDB_HOST=obp_institution_db
+      - AUTHDB_HOST=obp_institution_authdb
       - API_DEBUG=True
       - ALLOW_ORIGIN=http://172.21.0.5
     env_file:
       - ./config/db.env
+      - ./config/authdb.env
+      - ./config/api.env
     depends_on:
       - obp_institution_db
+    networks:
+      institutions:
+        ipv4_address: 172.21.0.4
 
--volumes:
+volumes:
   db:
+  authdb:
+
+networks:
+  institutions:
+    name: "institutions"
+    ipam:
+      config:
+       - subnet: 172.21.0.0/24
