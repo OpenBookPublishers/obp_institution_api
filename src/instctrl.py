@@ -1,20 +1,21 @@
 import web
 from api import *
 from errors import *
-from models import Institution
+from models import Institution, Country
 import json
 
 logger = logging.getLogger(__name__)
 
 class InstitutionController(object):
     """Handles institution queries"""
-    
+
     @json_response
     def OPTIONS(self,name):
         return
 
     @json_response
     @api_response
+    @check_token
     def GET(self, name):
         """ Get institutions."""
         logger.debug("Query: %s" % (web.input()))
@@ -32,8 +33,10 @@ class InstitutionController(object):
 
     @json_response
     @api_response
+    @check_token
     def POST(self, name):
         """Inserts new institution."""
+        logger.debug(web.data())
         data = json.loads(web.data())
         institution_name = data.get('institution_name')
         country_code = data.get('country_code')
@@ -44,15 +47,17 @@ class InstitutionController(object):
         parent_of = data.get('parent_of')
         child_of = data.get('child_of')
         try:
-            assert institution_name
+            assert institution_name and ip_ranges
         except AssertionError as error:
             logger.debug(error)
-            raise Error(BADPARAMS)
+            raise Error(BADPARAMS,msg="Both institution name and ip range are required.")
         try:
             country = ""
             if country_name and not country_code:
+                logger.debug(country_name)
                 country = country_name
                 country_code = Country.get_from_name(country_name).first()['country_code']
+                logger.debug(country_code)
             elif country_code and not country_name:
                 country = country_code
                 country_name = Country(country_code).get_names().first()['country_name']
@@ -73,6 +78,7 @@ class InstitutionController(object):
 
     @json_response
     @api_response
+    @check_token
     def PUT(self, name):
         """Checks if entry exists using uuid, then modifies it."""
         data = json.loads(web.data())
@@ -94,6 +100,7 @@ class InstitutionController(object):
 
     @json_response
     @api_response
+    @check_token
     def DELETE(self, name):
         """Deletes institution using institution uuid."""
         institution_uuid = web.input().get('institution_uuid')

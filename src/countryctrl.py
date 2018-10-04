@@ -14,6 +14,7 @@ class CountryController(object):
 
     @json_response
     @api_response
+    @check_token
     def GET(self, name):
         """ Get countries."""
         logger.debug("Query: %s" % (web.input()))
@@ -31,6 +32,7 @@ class CountryController(object):
 
     @json_response
     @api_response
+    @check_token
     def POST(self, name):
         """Inserts new country."""
         data = json.loads(web.data())
@@ -47,11 +49,13 @@ class CountryController(object):
 
     @json_response
     @api_response
+    @check_token
     def PUT(self, name):
         raise Error(NOTALLOWED,msg="Try deleting or inserting instead.")
 
     @json_response
     @api_response
+    @check_token
     def DELETE(self, name):
         """Deletes country using either country name or country code."""
         country_name = web.input().get('country_name')
