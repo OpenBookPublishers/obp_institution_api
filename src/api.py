@@ -32,6 +32,10 @@ level = logging.NOTSET if debug else logging.ERROR
 logging.basicConfig(level=level)
 logger = logging.getLogger(__name__)
 
+# Get authentication configuration
+SECRET_KEY = os.environ['SECRET_KEY']
+TOKEN_LIFETIME = int(os.environ['TOKEN_LIFETIME'])
+PBKDF2_ITERATIONS = int(os.environ['PBKDF2_ITERATIONS'])
 
 # Define routes
 urls = (
@@ -40,6 +44,8 @@ urls = (
     "/countries(/?)", "countryctrl.CountryController",
     "/ipranges(/?)", "iprangectrl.IPRangeController",
     "/instrelations(/?)","instrelctrl.InstRelationsController",
+    "/auth(/?)","authctrl.AuthController",
+    "/cidrize(/?)","cidrizectrl.CidrizeController",
 )
 
 try:
@@ -48,6 +54,11 @@ try:
                       user=os.environ['INSTITUTIONDB_USER'],
                       pw=os.environ['INSTITUTIONDB_PASS'],
                       db=os.environ['INSTITUTIONDB_DB'])
+    authdb = web.database(dbn='postgres',
+                          host=os.environ['AUTHDB_HOST'],
+                          user=os.environ['AUTHDB_USER'],
+                          pw=os.environ['AUTHDB_PASS'],
+                          db=os.environ['AUTHDB_DB'])
 except Exception as error:
     logger.error(error)
     raise Error(FATAL)
@@ -58,7 +69,7 @@ def api_response(fn):
         data  = fn(self, *args, **kw)
         count = len(data)
         if count > 0:
-            return {'status': 'ok', 'count': count, 'data': data}
+            return {'status': 'ok', 'code': 200, 'count': count, 'data': data}
         else:
             raise Error(NORESULT)
     return response
@@ -72,8 +83,22 @@ def json_response(fn):
         web.header('Access-Control-Allow-Credentials', 'true')
         web.header('Access-Control-Allow-Headers',
         'Authorization, x-test-header, Origin, X-Requested-With, Content-Type, Accept')
+        web.header('Access-Control-Allow-Methods','POST, GET, OPTIONS, DELETE, PUT')
         return json.dumps(fn(self, *args, **kw), ensure_ascii=False)
     return response
+
+def check_token(fn):
+    """Decorator to act as middleware, checking authentication token"""
+    def response(self, *args, **kw):
+        intoken = get_token_from_header()
+        token = Token(intoken)
+        token.validate()
+        return fn(self, *args, **kw)
+    return response
+
+def get_token_from_header():
+    bearer = web.ctx.env.get('HTTP_AUTHORIZATION')
+    return bearer.replace("Bearer ", "") if bearer else ""
 
 def results_to_institutions(results):
     data = []
@@ -134,8 +159,8 @@ def result_to_relation(r):
 def generate_uuid():
     return str(uuid.uuid4())
 
-import instctrl, contactctrl, countryctrl, iprangectrl,instrelctrl
-from models import Institution, Contact, Country, IPRange, InstRelation
+import cidrizectrl, authctrl, instctrl, contactctrl, countryctrl, iprangectrl,instrelctrl
+from models import Token, Institution, Contact, Country, IPRange, InstRelation
 
 if __name__ == "__main__":
     logger.info("Starting API...")

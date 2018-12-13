@@ -11,9 +11,10 @@ class ContactController(object):
     @json_response
     def OPTIONS(self,name):
         return
-        
+
     @json_response
     @api_response
+    @check_token
     def GET(self, name):
         """ Get contacts."""
         logger.debug("Query: %s" % (web.input()))
@@ -31,6 +32,7 @@ class ContactController(object):
 
     @json_response
     @api_response
+    @check_token
     def POST(self, name):
         """Inserts new contact."""
         data = json.loads(web.data())
@@ -54,6 +56,7 @@ class ContactController(object):
 
     @json_response
     @api_response
+    @check_token
     def PUT(self, name):
         """Checks if entry exists using contact_uuid, then modifies it."""
         data = json.loads(web.data())
@@ -77,6 +80,7 @@ class ContactController(object):
 
     @json_response
     @api_response
+    @check_token
     def DELETE(self, name):
         """Deletes contact using contact name."""
         contact_uuid = web.input().get('contact_uuid')

@@ -1,6 +1,9 @@
+import jwt
 import psycopg2
+import datetime
 from api import *
 from errors import *
+from pbkdf2 import crypt
 
 logger = logging.getLogger(__name__)
 dateformat = '%Y-%m-%dT%H:%M:%S%z'
@@ -265,7 +268,7 @@ class IPRange(object):
             result = db.query(q,params)
         except Exception as error:
             logger.debug(error)
-            raise Error(FATAL)
+            raise Error(NOTVALIDIP,msg="The ip provided (%s) cannot be cidrized." % (self.ip_range_value))
         if result == 0:
             p = """SELECT * FROM(
             SELECT ip_range_value, institution_name,
@@ -433,3 +436,123 @@ class InstRelation(object):
         except Exception as error:
             logger.debug(error)
             raise Error(FATAL)
+
+class Account(object):
+    """API authentication accounts"""
+    def __init__(self, email, password, name = '', surname ='', auth = 'user'):
+        self.email     = email
+        self.id        = "acct:"+email
+        self.password  = password
+        self.name      = name
+        self.surname   = surname
+        self.authority = auth
+
+    def save(self):
+        try:
+            assert self.hash
+        except AttributeError:
+            self.hash_password()
+
+        try:
+            authdb.insert('account', account_id=self.id, email=self.email,
+                          password=self.hash, authority=self.authority,
+                          name=self.name, surname=self.surname)
+        except (Exception, psycopg2.DatabaseError) as error:
+            logger.error(error)
+            raise Error(FATAL)
+
+    def hash_password(self):
+        self.hash = crypt(self.password, iterations=PBKDF2_ITERATIONS)
+
+    def renew_token(self):
+        try:
+            token = Token(sub=self.id)
+            self.token = token.encoded().decode()
+            if self.token:
+                token.clear_previous()
+                token.save()
+            return self.token;
+        except Exception as e:
+            logger.error(e)
+            raise Error(FATAL)
+
+    def is_valid(self):
+        options = dict(email=self.email)
+        result = authdb.select('account', options, where="email = $email")
+        if not result:
+            return False
+        res = result.first()
+        self.hash = res["password"]
+        self.authority = res["authority"]
+        self.name = res["name"]
+        self.surname = res["surname"]
+        return self.is_password_correct()
+
+    def is_password_correct(self):
+        return self.hash == crypt(self.password, self.hash)
+
+class Token(object):
+    """API tokens"""
+    def __init__(self, token=None, sub=None, exp=None, iat=None):
+        self.token = token
+        self.sub = sub
+        self.iat = iat if exp else datetime.datetime.utcnow()
+        self.exp = exp if exp else self.iat + datetime.timedelta(
+                      seconds=TOKEN_LIFETIME)
+        self.load_payload()
+
+    def load_payload(self):
+        self.payload = {'exp': self.exp, 'iat': self.iat, 'sub': self.sub}
+
+    def update_from_payload(self, payload):
+        self.sub = payload['sub']
+        self.iat = payload['iat']
+        self.exp = payload['exp']
+        self.load_payload()
+
+    def encoded(self):
+        if not self.token:
+            self.token = jwt.encode(self.payload, SECRET_KEY, algorithm='HS256')
+        return self.token
+
+    def validate(self):
+        try:
+            payload = jwt.decode(self.token, SECRET_KEY)
+            self.update_from_payload(payload)
+            if not self.is_valid():
+                raise jwt.InvalidTokenError()
+            return self.sub
+        except jwt.exceptions.DecodeError:
+            raise Error(FORBIDDEN)
+        except jwt.ExpiredSignatureError:
+            raise Error(UNAUTHORIZED, msg="Signature expired.")
+        except jwt.InvalidTokenError:
+            raise Error(UNAUTHORIZED, msg="Invalid token.")
+
+    def is_valid(self):
+        result = authdb.select('account_token',
+            where={'token': self.token, 'account_id': self.sub})
+        return result and "token" in result.first()
+
+    def clear_previous(self):
+        options = {"id": self.sub}
+        q = '''DELETE FROM token WHERE token =
+                 (SELECT token FROM account_token WHERE account_id = $id);'''
+        try:
+            return authdb.query(q, options)
+        except (Exception, psycopg2.DatabaseError) as error:
+            logger.error(error)
+            raise Error(FATAL)
+
+    def save(self):
+        try:
+            authdb.insert('token', token=self.token,
+                          timestamp=self.iat.strftime('%Y-%m-%dT%H:%M:%S%z'),
+                          expiry=self.exp.strftime('%Y-%m-%dT%H:%M:%S%z'))
+            authdb.insert('account_token', account_id=self.sub,
+                          token=self.token)
+        except (Exception, psycopg2.DatabaseError) as error:
+            logger.error(error)
+            raise Error(FATAL)
+
+

@@ -11,9 +11,10 @@ class IPRangeController(object):
     @json_response
     def OPTIONS(self,name):
         return
-        
+
     @json_response
     @api_response
+    @check_token
     def GET(self, name):
         """ Get IP Range."""
         logger.debug("Query: %s" % (web.input()))
@@ -31,6 +32,7 @@ class IPRangeController(object):
 
     @json_response
     @api_response
+    @check_token
     def POST(self, name):
         """Inserts new iprange."""
         data = json.loads(web.data())
@@ -51,6 +53,7 @@ class IPRangeController(object):
 
     @json_response
     @api_response
+    @check_token
     def DELETE(self, name):
         """Deletes ip-range using ip-range."""
         ip_range_value = web.input().get('ip_range_value')
